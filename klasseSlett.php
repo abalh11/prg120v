@@ -10,7 +10,29 @@
 <form method="post" action="" id="slettKlasseSkjema" name="slettKlasseSkjema"
     onsubmit="return confirm('Er du sikker på at du vil slette klassen?')">
 
-    Klassekode <input type="text" id="klassekode" name="klassekode" maxlength="5" required /> <br />
+    <?php
+    include_once("db-tilkobling.php");
+    ?>
+
+    Klassekode
+    <select id="klassekode" name="klassekode" required>
+        <option value="">Velg klasse</option>
+
+        <?php
+        $sqlSetning = "SELECT * FROM klasse ORDER BY klassekode;";
+        $sqlResultat = mysqli_query($db, $sqlSetning)
+            or die("Ikke mulig å hente klasser");
+
+        while ($rad = mysqli_fetch_array($sqlResultat)) {
+            $klassekode = htmlspecialchars(trim($rad["klassekode"]), ENT_QUOTES, "UTF-8");
+            $klassenavn = htmlspecialchars($rad["klassenavn"], ENT_QUOTES, "UTF-8");
+
+            print ("<option value='$klassekode'>
+            $klassekode - $klassenavn
+        </option>");
+        }
+        ?>
+    </select> <br />
 
     <input type="submit" value="Slett klasse" name="slettKlasseKnapp" id="slettKlasseKnapp" />
 
