@@ -33,7 +33,7 @@ if (isset($_POST["registrerKlasseKnapp"])) {
     if (!$klassekode || !$klassenavn || !$studiumkode) {
         print ("Alle feltene må fylles ut");
     } else {
-        include("db-tilkobling.php");
+        require_once __DIR__ . "/db-tilkobling.php";
 
         $sqlSetning = "SELECT klassekode FROM klasse WHERE klassekode = ?";
         $stmt = mysqli_prepare($db, $sqlSetning);

@@ -1,0 +1,64 @@
+<?php  /* slett-klasse */
+/*
+/* Programmet lager et skjema for å velge en klasse som skal slettes
+/* Programmet sletter den valgte klassen
+*/
+?>
+
+<h3>Slett klasse</h3>
+
+<form method="post" action="" id="slettKlasseSkjema" name="slettKlasseSkjema"
+    onsubmit="return confirm('Er du sikker på at du vil slette klassen?')">
+
+    Klassekode <input type="text" id="klassekode" name="klassekode" maxlength="5" required /> <br />
+
+    <input type="submit" value="Slett klasse" name="slettKlasseKnapp" id="slettKlasseKnapp" />
+
+</form>
+
+<?php
+if (isset($_POST["slettKlasseKnapp"])) {
+    $klassekode = trim($_POST["klassekode"]);
+
+    if (!$klassekode) {
+        print ("Klassekode må fylles ut");
+    } else {
+        require_once __DIR__ . "/db-tilkobling.php";
+        $sqlSetning = "SELECT * FROM klasse WHERE klassekode=?;";
+        $stmt = mysqli_prepare($db, $sqlSetning);
+        mysqli_stmt_bind_param($stmt, "s", $klassekode);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+
+        $antallRader = mysqli_stmt_num_rows($stmt);
+        mysqli_stmt_close($stmt);
+
+        if ($antallRader == 0) {
+            print ("Klassen finnes ikke");
+        } else {
+            /* Sjekker om studenter tilhører klassen */
+            $sqlSetning = "SELECT brukernavn FROM student WHERE klassekode=?;";
+            $stmt = mysqli_prepare($db, $sqlSetning);
+            mysqli_stmt_bind_param($stmt, "s", $klassekode);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_store_result($stmt);
+
+            $antallStudenter = mysqli_stmt_num_rows($stmt);
+            mysqli_stmt_close($stmt);
+
+            if ($antallStudenter > 0) {
+                print ("Klassen kan ikke slettes fordi den har registrerte studenter");
+            } else {
+                $sqlSetning = "DELETE FROM klasse WHERE klassekode=?;";
+                $stmt = mysqli_prepare($db, $sqlSetning);
+                mysqli_stmt_bind_param($stmt, "s", $klassekode);
+                mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+
+                print ("Følgende klasse er nå slettet: "
+                    . htmlspecialchars($klassekode, ENT_QUOTES, "UTF-8"));
+            }
+        }
+    }
+}
+?>
